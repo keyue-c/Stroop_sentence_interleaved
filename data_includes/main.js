@@ -2,7 +2,7 @@ PennController.ResetPrefix(null) // Shorten command names (keep this line here)
 
 // Show the 'intro' trial first, then all the 'experiment' trials in a random order
 // then send the results and finally show the trial labeled 'bye'
-Sequence( "intro", "practice_color", "color_matching", "practice_stroop", "stroop", "practice_combined", "practice", "exp_instru", randomize("experiment"), SendResults(), "bye" )
+Sequence( "intro", "practice_color", randomize("color_matching"), "practice_stroop", randomize("stroop"), "practice_combined", randomize("practice"), "exp_instru", randomize("experiment"), SendResults(), "bye" )
 
 
 // What is in Header happens at the beginning of every single trial
