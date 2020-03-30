@@ -1,0 +1,49 @@
+﻿Block,Group,Item,Condition,Sentence,Question,QAnswer,FontColour,FontColourCode,Word,wtroopButton ,TrialType
+1,3,7,A,A yellow frisbee dangled from the roof landed in the ditch.,Was a frisbee dangled from the roof?,Yes,Blue,"rgb(0, 0, 255)",<br/>Blue,q,Stroop_Sentence
+1,4,7,B,A yellow frisbee that was dangled from the roof landed in the ditch.,Was a frisbee dangled from the roof?,Yes,Green,"rgb(34, 139, 34)",<br/>Brown,w,Stroop_Sentence
+1,1,7,C,A yellow frisbee dangled from the roof landed in the ditch.,Was a frisbee dangled from the roof?,Yes,Green,"rgb(34, 139, 34)",<br/>Orange,w,Stroop_Sentence
+1,2,7,D,A yellow frisbee that was dangled from the roof landed in the ditch.,Was a frisbee dangled from the roof?,Yes,Green,"rgb(34, 139, 34)",<br/>Green,w,Stroop_Sentence
+1,4,8,A,The large package dropped from the plane hit several tall trees.,Were several trees hit by the package?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Yellow,e,Stroop_Sentence
+1,1,8,B,The large package that was dropped from the plane hit several tall trees.,Were several trees hit by the package?,Yes,Green,"rgb(34, 139, 34)",<br/>Red,w,Stroop_Sentence
+1,2,8,C,The large package dropped from the plane hit several tall trees.,Were several trees hit by the package?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Brown,e,Stroop_Sentence
+1,3,8,D,The large package that was dropped from the plane hit several tall trees.,Were several trees hit by the package?,Yes,Blue,"rgb(0, 0, 255)",<br/>Blue,q,Stroop_Sentence
+1,1,9,A,Monica’s blue pen rested on the desk wound up getting stolen.,Did someone take Monica's pen?,Yes,Green,"rgb(34, 139, 34)",<br/>Green,w,Stroop_Sentence
+1,2,9,B,Monica’s blue pen that was rested on the desk wound up getting stolen.,Did someone take Monica's pen?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Orange,e,Stroop_Sentence
+1,3,9,C,Monica’s blue pen rested on the desk wound up getting stolen.,Did someone take Monica's pen?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Red,e,Stroop_Sentence
+1,4,9,D,Monica’s blue pen that was rested on the desk wound up getting stolen.,Did someone take Monica's pen?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Yellow,e,Stroop_Sentence
+1,2,10,A,The frightened kid moved through the crowd got separated from Jane.,Did the kid get separated  from Jane,Yes,Blue,"rgb(0, 0, 255)",<br/>Blue,q,Stroop_Sentence
+1,3,10,B,The frightened kid who was moved through the crowd got separated from Jane.,Did the kid get separated  from Jane,Yes,Blue,"rgb(0, 0, 255)",<br/>Brown,q,Stroop_Sentence
+1,4,10,C,The frightened kid moved through the crowd got separated from Jane.,Did the kid get separated  from Jane,Yes,Blue,"rgb(0, 0, 255)",<br/>Orange,q,Stroop_Sentence
+1,1,10,D,The frightened kid who was moved through the crowd got separated from Jane.,Did the kid get separated  from Jane,Yes,Green,"rgb(34, 139, 34)",<br/>Green,w,Stroop_Sentence
+1,3,11,A,An impatient shopper shoved through the doors complained to the manager.,Did someone shove an impatient shopper through the doors?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Yellow,e,Stroop_Sentence
+1,4,11,B,An impatient shopper who was shoved through the doors complained to the manager.,Did someone shove an impatient shopper through the doors?,Yes,Blue,"rgb(0, 0, 255)",<br/>Red,q,Stroop_Sentence
+1,1,11,C,An impatient shopper shoved through the doors complained to the manager.,Did someone shove an impatient shopper through the doors?,Yes,Green,"rgb(34, 139, 34)",<br/>Brown,w,Stroop_Sentence
+1,2,11,D,An impatient shopper who was shoved through the doors complained to the manager.,Did someone shove an impatient shopper through the doors?,Yes,Blue,"rgb(0, 0, 255)",<br/>Blue,q,Stroop_Sentence
+1,4,12,A,The nervous wrestler hurried through the stands hadn't seen his opponent.,Was the wrestler hurried through the stands?,Yes,Green,"rgb(34, 139, 34)",<br/>Green,w,Stroop_Sentence
+1,1,12,B,The nervous wrestler who was hurried through the stands hadn't seen his opponent.,Was the wrestler hurried through the stands?,Yes,Green,"rgb(34, 139, 34)",<br/>Orange,w,Stroop_Sentence
+1,2,12,C,The nervous wrestler hurried through the stands hadn't seen his opponent.,Was the wrestler hurried through the stands?,Yes,Green,"rgb(34, 139, 34)",<br/>Red,w,Stroop_Sentence
+1,3,12,D,The nervous wrestler who was hurried through the stands hadn't seen his opponent.,Was the wrestler hurried through the stands?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Yellow,e,Stroop_Sentence
+1,1,43,F,The guest speaker nervously coughed before addressing the small audience.,Was the small audience addressed by the guest speaker?,Yes,Green,"rgb(34, 139, 34)",<br/>Green,w,Sentence_Stroop
+1,1,44,F,The children in the park could be heard three blocks away.,Were the children being loud?,Yes,Blue,"rgb(0, 0, 255)",<br/>Red,q,Sentence_Stroop
+1,1,45,F,The quilts were sold by the side of the road for ten pounds.,Were the quilts sold by the side of the road?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Yellow,e,Sentence_Stroop
+1,1,46,F,The map's labels for the former Soviet states were out of date.,Were the maps labels for the former Soviet states out of date?,Yes,Green,"rgb(34, 139, 34)",<br/>Orange,w,Sentence_Stroop
+1,1,47,F,Each of the taxi drivers had their own favorite route to get to the airport.,Did each taxi driver have a preferred route to get to the airport?,Yes,Blue,"rgb(0, 0, 255)",<br/>Blue,q,Sentence_Stroop
+1,1,48,F,The physics professor at the university was finally going to retire.,Was the physics professor finally going to retire?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Brown,e,Sentence_Stroop
+1,2,43,F,The guest speaker nervously coughed before addressing the small audience.,Was the small audience addressed by the guest speaker?,Yes,Green,"rgb(34, 139, 34)",<br/>Green,w,Sentence_Stroop
+1,2,44,F,The children in the park could be heard three blocks away.,Were the children being loud?,Yes,Blue,"rgb(0, 0, 255)",<br/>Red,q,Sentence_Stroop
+1,2,45,F,The quilts were sold by the side of the road for ten pounds.,Were the quilts sold by the side of the road?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Yellow,e,Sentence_Stroop
+1,2,46,F,The map's labels for the former Soviet states were out of date.,Were the maps labels for the former Soviet states out of date?,Yes,Green,"rgb(34, 139, 34)",<br/>Orange,w,Sentence_Stroop
+1,2,47,F,Each of the taxi drivers had their own favorite route to get to the airport.,Did each taxi driver have a preferred route to get to the airport?,Yes,Blue,"rgb(0, 0, 255)",<br/>Blue,q,Sentence_Stroop
+1,2,48,F,The physics professor at the university was finally going to retire.,Was the physics professor finally going to retire?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Brown,e,Sentence_Stroop
+1,3,43,F,The guest speaker nervously coughed before addressing the small audience.,Was the small audience addressed by the guest speaker?,Yes,Green,"rgb(34, 139, 34)",<br/>Green,w,Sentence_Stroop
+1,3,44,F,The children in the park could be heard three blocks away.,Were the children being loud?,Yes,Blue,"rgb(0, 0, 255)",<br/>Red,q,Sentence_Stroop
+1,3,45,F,The quilts were sold by the side of the road for ten pounds.,Were the quilts sold by the side of the road?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Yellow,e,Sentence_Stroop
+1,3,46,F,The map's labels for the former Soviet states were out of date.,Were the maps labels for the former Soviet states out of date?,Yes,Green,"rgb(34, 139, 34)",<br/>Orange,w,Sentence_Stroop
+1,3,47,F,Each of the taxi drivers had their own favorite route to get to the airport.,Did each taxi driver have a preferred route to get to the airport?,Yes,Blue,"rgb(0, 0, 255)",<br/>Blue,q,Sentence_Stroop
+1,3,48,F,The physics professor at the university was finally going to retire.,Was the physics professor finally going to retire?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Brown,e,Sentence_Stroop
+1,4,43,F,The guest speaker nervously coughed before addressing the small audience.,Was the small audience addressed by the guest speaker?,Yes,Green,"rgb(34, 139, 34)",<br/>Green,w,Sentence_Stroop
+1,4,44,F,The children in the park could be heard three blocks away.,Were the children being loud?,Yes,Blue,"rgb(0, 0, 255)",<br/>Red,q,Sentence_Stroop
+1,4,45,F,The quilts were sold by the side of the road for ten pounds.,Were the quilts sold by the side of the road?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Yellow,e,Sentence_Stroop
+1,4,46,F,The map's labels for the former Soviet states were out of date.,Were the maps labels for the former Soviet states out of date?,Yes,Green,"rgb(34, 139, 34)",<br/>Orange,w,Sentence_Stroop
+1,4,47,F,Each of the taxi drivers had their own favorite route to get to the airport.,Did each taxi driver have a preferred route to get to the airport?,Yes,Blue,"rgb(0, 0, 255)",<br/>Blue,q,Sentence_Stroop
+1,4,48,F,The physics professor at the university was finally going to retire.,Was the physics professor finally going to retire?,Yes,Yellow,"rgb(255, 245, 0)",<br/>Brown,e,Sentence_Stroop
