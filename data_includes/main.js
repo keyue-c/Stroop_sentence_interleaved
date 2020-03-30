@@ -3,7 +3,7 @@ PennController.ResetPrefix(null) // Shorten command names (keep this line here)
 // Show the 'intro' trial first, then all the 'experiment' trials in a random order
 // then send the results and finally show the trial labeled 'bye'
 Sequence( "intro", "practice_color", randomize("color_matching"), "end_color_matching", "practice_stroop", randomize("stroop"), 
-            "practice_combined", randomize("practice"), "exp_instru", randomize("experiment1"), "break", randomize("experiment2"), SendResults(), "bye" )
+            "practice_combined", randomize("practice"), "exp_instru", randomize("block1"), "break", randomize("block2"), SendResults(), "bye" )
 
 
 // What is in Header happens at the beginning of every single trial
@@ -251,15 +251,19 @@ newTrial("exp_instru",
     newHtml("exp_instru", "exp_instru.html")
         .print()
     ,
-    newKey(" ")
+    newButton("Continue")
+        .css("font-size", "1.5em")
+        .print()
         .wait()
     
 )
 
 // This Template command generates as many trials as there are rows in stimuli_ibex.csv
-Template( "stimuli_ibex_test1.csv" ,
-    // Row will iteratively point to every row in stimuli_ibex.csv
-    row => newTrial( "experiment1" ,
+Template(
+        GetTable("stimuli_ibex_test_2blocks.csv")
+        .filter("Block", "1")
+        ,
+    row => newTrial( "block1" ,
         newText("TrialType", row.TrialType)
             .test.text("Stroop_Sentence")
             .success(
@@ -317,7 +321,9 @@ Template( "stimuli_ibex_test1.csv" ,
                     .wait()
                 )
     )
+.log("Block" , row.Block)
 .log("Group" , row.Group)
+.log("item" , row.Item)
 .log("Condition", row.Condition)
     // Add these three columns to the results lines of these Template-based trials
 )
@@ -336,9 +342,11 @@ newTrial("break",
 )
 
 // This Template command generates as many trials as there are rows in stimuli_ibex.csv
-Template( "stimuli_ibex_test2.csv" ,
-    // Row will iteratively point to every row in stimuli_ibex.csv
-    row => newTrial( "experiment2" ,
+Template(
+        GetTable("stimuli_ibex_test_2blocks.csv")
+        .filter("Block", "2")
+        ,
+    row => newTrial( "block2" ,
         newText("TrialType", row.TrialType)
             .test.text("Stroop_Sentence")
             .success(
@@ -396,7 +404,9 @@ Template( "stimuli_ibex_test2.csv" ,
                     .wait()
                 )
     )
+.log("Block" , row.Block)
 .log("Group" , row.Group)
+.log("item" , row.Item)
 .log("Condition", row.Condition)
     // Add these three columns to the results lines of these Template-based trials
 )
