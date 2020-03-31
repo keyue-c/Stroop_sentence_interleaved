@@ -85,7 +85,7 @@ Template( "practice_matching_ibex.csv",
                                     ,
                                     newKey("re_col","QWE")
                                     ,
-                                    newTimer(500)
+                                    newTimer(1000)
                                         .callback(
                                             getText("col_pad").remove())
                                         .start()
@@ -141,7 +141,7 @@ Template( "practice_stroop_ibex.csv",
                                     ,
                                     newKey("re_col","QWE")
                                     ,
-                                    newTimer(500)
+                                    newTimer(1000)
                                         .callback(
                                             getText("word").remove())
                                         .start()
@@ -198,7 +198,7 @@ Template( "practice_combined_ibex.csv" ,
                 newKey("QWE")
                     .log()
                 ,
-                newTimer(500)
+                newTimer(1000)
                     .callback(
                         getText("Stroop").remove())
                     .start()
@@ -233,7 +233,7 @@ Template( "practice_combined_ibex.csv" ,
                 newKey("QWE")
                     .log()
                 ,
-                newTimer(500)
+                newTimer(1000)
                     .callback(
                         getText("Stroop").remove())
                     .start()
@@ -275,7 +275,7 @@ Template(
                 newKey("QWE")
                     .log()
                 ,
-                newTimer(500)
+                newTimer(1000)
                     .callback(
                         getText("Stroop").remove())
                     .start()
@@ -314,7 +314,7 @@ Template(
                 newKey("QWE")
                     .log()
                 ,
-                newTimer(500)
+                newTimer(1000)
                     .callback(
                         getText("Stroop").remove())
                     .start()
@@ -358,7 +358,7 @@ Template(
                 newKey("QWE")
                     .log()
                 ,
-                newTimer(500)
+                newTimer(1000)
                     .callback(
                         getText("Stroop").remove())
                     .start()
@@ -397,7 +397,7 @@ Template(
                 newKey("QWE")
                     .log()
                 ,
-                newTimer(500)
+                newTimer(1000)
                     .callback(
                         getText("Stroop").remove())
                     .start()
