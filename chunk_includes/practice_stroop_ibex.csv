@@ -1,25 +1,21 @@
 FontColorName,FontColourCode,Word,TrialCondition,Button,TrialName
-Blue,"rgb(0, 0, 255)",<br/>Blue,C,q,StroopPractice
-Green,"rgb(34, 139, 34)",<br/>Green,C,w,StroopPractice
-Green,"rgb(34, 139, 34)",<br/>Orange,I,w,StroopPractice
-Yellow,"rgb(255, 245, 0)",<br/>Yellow,C,e,StroopPractice
-Blue,"rgb(0, 0, 255)",<br/>Orange,I,q,StroopPractice
-Green,"rgb(34, 139, 34)",<br/>Green,C,w,StroopPractice
-Blue,"rgb(0, 0, 255)",<br/>Red,I,q,StroopPractice
-Yellow,"rgb(255, 245, 0)",<br/>Yellow,C,e,StroopPractice
-Green,"rgb(34, 139, 34)",<br/>Brown,I,w,StroopPractice
-Yellow,"rgb(255, 245, 0)",<br/>Red ,I,e,StroopPractice
-Blue,"rgb(0, 0, 255)",<br/>Blue,C,q,StroopPractice
-Green,"rgb(34, 139, 34)",<br/>Green,C,w,StroopPractice
-Green,"rgb(34, 139, 34)",<br/>Orange,I,w,StroopPractice
-Yellow,"rgb(255, 245, 0)",<br/>Yellow,C,e,StroopPractice
-Blue,"rgb(0, 0, 255)",<br/>Orange,I,q,StroopPractice
-Green,"rgb(34, 139, 34)",<br/>Green,C,w,StroopPractice
-Blue,"rgb(0, 0, 255)",<br/>Red,I,q,StroopPractice
-Yellow,"rgb(255, 245, 0)",<br/>Yellow,C,e,StroopPractice
-Green,"rgb(34, 139, 34)",<br/>Brown,I,w,StroopPractice
-Yellow,"rgb(255, 245, 0)",<br/>Red ,I,e,StroopPractice
-Blue,"rgb(0, 0, 255)",<br/>Blue,C,q,StroopPractice
-Green,"rgb(34, 139, 34)",<br/>Green,C,w,StroopPractice
-Green,"rgb(34, 139, 34)",<br/>Orange,I,w,StroopPractice
-Yellow,"rgb(255, 245, 0)",<br/>Yellow,C,e,StroopPractice
+Blue,"rgb(0, 0, 255)",Blue,C,1,StroopPractice
+Green,"rgb(34, 139, 34)",Green,C,2,StroopPractice
+Green,"rgb(34, 139, 34)",Orange,I,2,StroopPractice
+Yellow,"rgb(255, 245, 0)",Yellow,C,3,StroopPractice
+Blue,"rgb(0, 0, 255)",Orange,I,1,StroopPractice
+Green,"rgb(34, 139, 34)",Green,C,2,StroopPractice
+Blue,"rgb(0, 0, 255)",Red,I,1,StroopPractice
+Yellow,"rgb(255, 245, 0)",Yellow,C,3,StroopPractice
+Green,"rgb(34, 139, 34)",Brown,I,2,StroopPractice
+Yellow,"rgb(255, 245, 0)",Red ,I,3,StroopPractice
+Blue,"rgb(0, 0, 255)",Blue,C,1,StroopPractice
+Green,"rgb(34, 139, 34)",Green,C,2,StroopPractice
+Green,"rgb(34, 139, 34)",Orange,I,2,StroopPractice
+Yellow,"rgb(255, 245, 0)",Yellow,C,3,StroopPractice
+Blue,"rgb(0, 0, 255)",Orange,I,1,StroopPractice
+Green,"rgb(34, 139, 34)",Green,C,2,StroopPractice
+Blue,"rgb(0, 0, 255)",Red,I,1,StroopPractice
+Yellow,"rgb(255, 245, 0)",Yellow,C,3,StroopPractice
+Green,"rgb(34, 139, 34)",Brown,I,2,StroopPractice
+Yellow,"rgb(255, 245, 0)",Red ,I,3,StroopPractice

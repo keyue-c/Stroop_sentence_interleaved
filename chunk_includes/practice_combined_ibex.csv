@@ -1,9 +1,9 @@
 ﻿Sentence,Question,Answer,Font,FontColourCode,Word,Button,TrialType
-The scheming gambler delivered an ace to the casino owner.,Did the casino owner get an ace?,Yes,Blue,"rgb(0, 0, 255)",<br/>Orange,q,Sentence_Stroop
-The pilots flew over the city where they had just had a wonderful weekend.,Did the pilots' weekend trip go wrong? ,No,Green,"rgb(34,139,34)",<br/>Green,w,Stroop_Sentence
-The flags in the gym stand for all the different countries participating in the tournament.,Did multiple countries participate in the tournament?,Yes,Blue,"rgb(0, 0, 255)",<br/>Blue,q,Stroop_Sentence
-The babysitter gave the screaming toddler a chocolate.,Did the babysitter offer the toddler a lolipop?,No,Yellow,"rgb(255,245,0)",<br/>Yellow,e,Sentence_Stroop
-The wealthy socialite gave the needy child a scholarship.,Did the child apply for a student loan?,No,Blue,"rgb(0, 0, 255)",<br/>Red,q,Stroop_Sentence
-Bikes were not permitted on the town's pavements.,Were bikes forbidden on the pavement?,Yes,Yellow,"rgb(255,245,0)",<br/>Brown,e,Stroop_Sentence
-The librarian read the extremely dense book to the school students.,Was the book read to the students?,No,Green,"rgb(34,139,34)",<br/>Red,w,Sentence_Stroop
-The businessmen were made sick by the rancid poultry.,Did the businessmen feel sick?,Yes,Green,"rgb(34,139,34)",<br/>Green,w,Sentence_Stroop
+The scheming gambler delivered an ace to the casino owner.,Did the casino owner get an ace?,1,Blue,"rgb(0, 0, 255)",Orange,1,Sentence_Stroop
+The pilots flew over the city where they had just had a wonderful weekend.,Did the pilots' weekend trip go wrong? ,2,Green,"rgb(34,139,34)",Green,2,Stroop_Sentence
+The flags in the gym stand for all the different countries participating in the tournament.,Did multiple countries participate in the tournament?,1,Blue,"rgb(0, 0, 255)",Blue,1,Stroop_Sentence
+The babysitter gave the screaming toddler a chocolate.,Did the babysitter offer the toddler a lolipop?,2,Yellow,"rgb(255,245,0)",Yellow,3,Sentence_Stroop
+The wealthy socialite gave the needy child a scholarship.,Did the child apply for a student loan?,2,Blue,"rgb(0, 0, 255)",Red,1,Stroop_Sentence
+Bikes were not permitted on the town's pavements.,Were bikes forbidden on the pavement?,1,Yellow,"rgb(255,245,0)",Brown,3,Stroop_Sentence
+The librarian read the extremely dense book to the school students.,Was the book read to the students?,2,Green,"rgb(34,139,34)",Red,2,Sentence_Stroop
+The businessmen were made sick by the rancid poultry.,Did the businessmen feel sick?,1,Green,"rgb(34,139,34)",Green,2,Sentence_Stroop

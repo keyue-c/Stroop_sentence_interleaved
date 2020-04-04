@@ -22,10 +22,12 @@ Header(
     ,
     newVar("score_stroop",0)
         .global()
+    ,
+    newImage("fixation", "FIXATION.bmp")
+        .size(35,35)
 )
 .log( "ID" , getVar("ID") )
 // This log command adds a column reporting the participant's name to every line saved to the results
-
 
 // Part1 information and consent
 newTrial( "intro" ,
@@ -62,10 +64,14 @@ newTrial( "intro" ,
         .print()
         .wait()                 // The next command won't be executed until Enter is pressed
         .setVar( "ID" )
+    ,
+    newButton("Start")
+        .print()
+        .wait()
         // This setVar command stores the value from the TextInput element into the Var element
 )
 
-
+// Part2 practice trials: color matching
 newTrial("practice_color",
     newHtml("prac_col", "prac_instru1.html")
         .print()
@@ -77,47 +83,72 @@ newTrial("practice_color",
 Template( "practice_matching_ibex.csv",
     row => newTrial("color_matching",
                 getVar("score_matching")
-                    .test.is(6).failure(
-                                    newText("col_pad", row.Word)
+                    .test.is(6).failure(// fixation test
+                                    getImage("fixation")
+                                        .print("center at 50%", "middle at 37.5%")
+                                    ,
+                                    newTimer(300)
+                                        .start()
+                                        .wait()
+                                    ,
+                                    getImage("fixation")
+                                        .remove()
+                                    ,
+                                    newTimer(200)
+                                        .start()
+                                        .wait()
+                                    , // show color patch
+                                    newText("color_patch", "▪")
                                         .color(row.FontColourCode)
-                                        .css("font-size", "7em")
-                                        .print()
+                                        .css("font-size", "10em")
+                                        .print("center at 50%", "middle at 37.5%")
                                     ,
-                                    newKey("re_col","QWE")
-                                    ,
-                                    newTimer(1000)
-                                        .callback(
-                                            getText("col_pad").remove())
+                                    newTimer("delay", 1000)
                                         .start()
+                                    , //timer.stop will stop timer and will not continue it again
+                                    newKey("re_color", 49, 50, 51)
+                                        .callback(getTimer("delay").stop())
+                                    ,
+                                    getTimer("delay")
                                         .wait()
                                     ,
-                                    getKey("re_col")
+                                    getText("color_patch")
+                                        .remove()
+                                    ,
+                                    getKey("re_color")
                                         .test.pressed(row.Button)
-                                            .success(newText("<br/><br/><br/><br/>CORRECT!")
-                                                .center()
-                                                .print(), 
-                                                getVar("score_matching").set(v=>v+1))
-                                            .failure(newText("<br/><br/><br/><br/>INCORRECT!")
-                                                .center()
-                                                .color("red")
-                                                .print())
-                                    ,
-                                    newText("display score", "")
-                                        .text(getVar("score_matching"))
-                                        .before(newText("left label", "You've got &nbsp;"))
-                                        .after(newText("right label", "&nbsp; correct"))
-                                        .print()
+                                            .success(getVar("score_matching").set(v=>v+1),
+                                                    newText("correct","<br/><br/><br/><br/>CORRECT!")
+                                                        .print("center at 50%", "middle at 35%"),
+                                                    newText("display_score", "")
+                                                        .text(getVar("score_matching"))
+                                                        .before(newText("left label", "You've got &nbsp;"))
+                                                        .after(newText("right label", "&nbsp; correct"))
+                                                        .print("center at 45%", "middle at 45%"))
+                                            .failure(newText("incorrect","<br/><br/><br/><br/>INCORRECT!")
+                                                        .color("red")
+                                                        .print("center at 50%", "middle at 35%"),
+                                                    newText("display_score", "")
+                                                        .text(getVar("score_matching"))
+                                                        .before(newText("left label", "You've got &nbsp;"))
+                                                        .after(newText("right label", "&nbsp; correct"))
+                                                        .print("center at 45%", "middle at 45%"))
                                     ,
                                     newTimer(1000)
                                         .start()
                                         .wait()
-                                    )
-                )
+                                )
+        )
 )
 
 
+// Part3 Practice trials: stroop
 newTrial("practice_stroop",
-    newText("<p>Then we'll print colour names in different inks.</p><p>Press <b>space bar</b> to start practice</p>")
+    newText("<p>Then we'll print colour names in different inks.</p>")
+        .css("font-size", "1.5em")
+        .print()
+    ,
+    newText("<p><b>Remember:</b></p><p>Press butten <b>\"1\"</b> when ink is <b>blue</b></p><p>Press butten <b>\"2\"</b> when ink is <b>green</b></p><p>Press butten <b>\"3\"</b> when ink is <b>yellow</b></p><p>Press <b>space bar</b> to start practice.</p>")
         .css("font-size", "1.2em")
         .print()
     ,
@@ -133,36 +164,56 @@ newTrial("practice_stroop",
 Template( "practice_stroop_ibex.csv",
     row => newTrial("stroop",
                 getVar("score_stroop")
-                    .test.is(10).failure(
-                                    newText("word", row.Word)
-                                        .color(row.FontColourCode)
-                                        .css("font-size", "1.5em")
-                                        .print()
+                    .test.is(10).failure(// fixation scross
+                                    getImage("fixation")
+                                        .print("center at 50%", "middle at 37.5%")
                                     ,
-                                    newKey("re_col","QWE")
-                                    ,
-                                    newTimer(1000)
-                                        .callback(
-                                            getText("word").remove())
+                                    newTimer(300)
                                         .start()
                                         .wait()
                                     ,
-                                    getKey("re_col")
-                                        .test.pressed(row.Button)
-                                            .success(newText("<br/><br/><br/>CORRECT!")
-                                                .center()
-                                                .print(),
-                                                getVar("score_stroop").set(v=>v+1))
-                                            .failure(newText("<br/><br/><br/>INCORRECT!")
-                                                .center()
-                                                .color("red")
-                                                .print())
+                                    getImage("fixation")
+                                        .remove()
                                     ,
-                                    newText("display score", "")
-                                        .text(getVar("score_stroop"))
-                                        .before(newText("left label", "You've got &nbsp;"))
-                                        .after(newText("right label", "&nbsp; correct"))
-                                        .print()
+                                    newTimer(200)
+                                        .start()
+                                        .wait()
+                                    , // show stroop word
+                                    newText("stroop_word", row.Word)
+                                        .color(row.FontColourCode)
+                                        .css("font-size", "1.5em")
+                                        .print("center at 50%", "middle at 37.5%")
+                                    ,
+                                    newTimer("delay", 1000)
+                                        .start()
+                                    , //timer.stop will stop timer and will not continue it again
+                                    newKey("re_stroop", 49, 50, 51)
+                                        .callback(getTimer("delay").stop())
+                                    ,
+                                    getTimer("delay")
+                                        .wait()
+                                    ,
+                                    getText("stroop_word")
+                                        .remove()
+                                    ,
+                                    getKey("re_stroop")
+                                        .test.pressed(row.Button)
+                                            .success(getVar("score_stroop").set(v=>v+1),
+                                                    newText("correct","<br/><br/><br/><br/>CORRECT!")
+                                                        .print("center at 50%", "middle at 35%"),
+                                                    newText("display_score", "")
+                                                        .text(getVar("score_stroop"))
+                                                        .before(newText("left label", "You've got &nbsp;"))
+                                                        .after(newText("right label", "&nbsp; correct"))
+                                                        .print("center at 45%", "middle at 45%"))
+                                            .failure(newText("incorrect","<br/><br/><br/><br/>INCORRECT!")
+                                                        .color("red")
+                                                        .print("center at 50%", "middle at 35%"),
+                                                    newText("display_score", "")
+                                                        .text(getVar("score_stroop"))
+                                                        .before(newText("left label", "You've got &nbsp;"))
+                                                        .after(newText("right label", "&nbsp; correct"))
+                                                        .print("center at 45%", "middle at 45%"))
                                     ,
                                     newTimer(1000)
                                         .start()
@@ -171,7 +222,7 @@ Template( "practice_stroop_ibex.csv",
         )
 )
 
-
+// Part4 Practice trials: practice combined
 newTrial("practice_combined",
     newText("<p>Now we'll combine colour matching with some reading.</p>")
         .css("font-size", "1.2em")
@@ -185,64 +236,151 @@ newTrial("practice_combined",
 )
 
 Template( "practice_combined_ibex.csv" ,
-    // Row will iteratively point to every row in stimuli_ibex.csv
+    // Row will iteratively point to every row in practice_combined_ibex.csv
     row => newTrial( "practice" ,
-        newText("TrialType", row.TrialType)
-            .test.text("Stroop_Sentence")
-            .success(
-                newText("Stroop", row.Word)
-                    .color(row.FontColourCode)
-                    .css("font-size", "1.5em")
-                    .print()
-                ,
-                newKey("QWE")
-                    .log()
-                ,
-                newTimer(1000)
-                    .callback(
-                        getText("Stroop").remove())
-                    .start()
-                    .wait()
-                ,
-                newController("DashedSentence",{s:row.Sentence})
-                    .print()
-                    .wait()
-                    .remove()
-                ,
-                newController("Question", {q:row.Question, as: ["yes","no"]})
-                    .print()
-                    .wait()
-                    .remove()
-                )
-            .failure(
-                newController("DashedSentence",{s:row.Sentence})
-                    .print()
-                    .wait()
-                    .remove()
-                ,
-                newController("Question", {q:row.Question, as: ["yes","no"]})
-                    .print()
-                    .wait()
-                    .remove()
-                ,
-                newText("Stroop", row.Word)
-                        .color(row.FontColourCode)
-                        .css("font-size", "1.5em")
-                        .print()
-                ,
-                newKey("QWE")
-                    .log()
-                ,
-                newTimer(1000)
-                    .callback(
-                        getText("Stroop").remove())
-                    .start()
-                    .wait()
+                    // use the text (no print) of the TrialType and test function to branch 2 trail types
+                    newText("TrialType", row.TrialType)
+                        .test.text("Stroop_Sentence")
+                        .success( // fixation cross for stroop                                ,
+                                getImage("fixation")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer(300)
+                                    .start()
+                                    .wait()
+                                ,
+                                getImage("fixation")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // show stroop word
+                                newText("stroop_word", row.Word)
+                                    .color(row.FontColourCode)
+                                    .css("font-size", "1.5em")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer("delay1", 1000)
+                                    .start()
+                                , //timer.stop will stop timer and will not continue it again
+                                newKey("re_stroop", 49, 50, 51)
+                                    .callback(getTimer("delay1").stop())
+                                ,
+                                getTimer("delay1")
+                                    .wait()
+                                ,
+                                getText("stroop_word")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // fixation cross for sentence
+                                getImage("fixation")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer(300)
+                                    .start()
+                                    .wait()
+                                ,
+                                getImage("fixation")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // self-paced sentence reading and question
+                                newController("DashedSentence",{s:row.Sentence})
+                                    .center()
+                                    .print("center at 50%", "middle at 37%")
+                                    .wait()
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                ,
+                                newController("Question", {q:row.Question, as: ["yes","no"]})
+                                    .center()
+                                    .print("center at 50%", "middle at 44.5%")
+                                    .wait()
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                )
+                        .failure( // fixation cross for sentence
+                                getImage("fixation")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer(300)
+                                    .start()
+                                    .wait()
+                                ,
+                                getImage("fixation")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // self-paced sentence reading and question
+                                newController("DashedSentence",{s:row.Sentence})
+                                    .center()
+                                    .print("center at 50%", "middle at 37%")
+                                    .wait()
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                ,
+                                newController("Question", {q:row.Question, as: ["yes","no"]})
+                                    .center()
+                                    .print("center at 50%", "middle at 44.5%")
+                                    .wait()
+                                    .remove()
+                                , // fixation cross for stroop
+                                getImage("fixation")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer(300)
+                                    .start()
+                                    .wait()
+                                ,
+                                getImage("fixation")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // show stroop word
+                                newText("stroop_word", row.Word)
+                                    .color(row.FontColourCode)
+                                    .css("font-size", "1.5em")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer("delay2", 1000)
+                                    .start()
+                                , //timer.stop will stop timer and will not continue it again
+                                newKey("re_stroop", 49, 50, 51)
+                                    .callback(getTimer("delay2").stop())
+                                ,
+                                getTimer("delay2")
+                                    .wait()
+                                ,
+                                getText("stroop_word")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
                 )
         )
 )
 
-
+// Part5: real experiment blocks
 newTrial("exp_instru",
     newText("Practice done! Here is a quick review:")
         .css("font-size", "1.7em")
@@ -258,72 +396,158 @@ newTrial("exp_instru",
     
 )
 
-// This Template command generates as many trials as there are rows in stimuli_ibex.csv
 Template(
         GetTable("stimuli_ibex_test_2blocks.csv")
-        .filter("Block", "1")
-        ,
+        .filter("Block", "1"),
     row => newTrial( "block1" ,
         newText("TrialType", row.TrialType)
             .test.text("Stroop_Sentence")
-            .success(
-                newText("Stroop", row.Word)
-                    .color(row.FontColourCode)
-                    .css("font-size", "1.5em")
-                    .print()
-                ,
-                newKey("QWE")
-                    .log()
-                ,
-                newTimer(1000)
-                    .callback(
-                        getText("Stroop").remove())
-                    .start()
-                    .wait()
-                ,
-                newController("DashedSentence",{s:row.Sentence})
-                    .print()
-                    .log()
-                    .wait()
-                    .remove()
-                ,
-                newController("Question", {q:row.Question, as: ["yes","no"]})
-                    .print()
-                    .log()
-                    .wait()
-                    .remove()
+                        .success( // fixation cross for stroop,
+                                getImage("fixation")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer(300)
+                                    .start()
+                                    .wait()
+                                ,
+                                getImage("fixation")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // show stroop word
+                                newText("stroop_word", row.Word)
+                                    .color(row.FontColourCode)
+                                    .css("font-size", "1.5em")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer("delay1", 1000)
+                                    .start()
+                                , //timer.stop will stop timer and will not continue it again
+                                newKey("re_stroop", 49, 50, 51)
+                                    .log()
+                                    .callback(getTimer("delay1").stop())
+                                ,
+                                getTimer("delay1")
+                                    .wait()
+                                ,
+                                getText("stroop_word")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // fixation cross for sentence
+                                getImage("fixation")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer(300)
+                                    .start()
+                                    .wait()
+                                ,
+                                getImage("fixation")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // self-paced sentence reading and question
+                                newController("DashedSentence",{s:row.Sentence})
+                                    .center()
+                                    .print("center at 50%", "middle at 37%")
+                                    .log()
+                                    .wait()
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                ,
+                                newController("Question", {q:row.Question, as: ["yes","no"]})
+                                    .center()
+                                    .print("center at 50%", "middle at 44.5%")
+                                    .log()
+                                    .wait()
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                )
+                        .failure( // fixation cross for sentence
+                                getImage("fixation")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer(300)
+                                    .start()
+                                    .wait()
+                                ,
+                                getImage("fixation")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // self-paced sentence reading and question
+                                newController("DashedSentence",{s:row.Sentence})
+                                    .center()
+                                    .print("center at 50%", "middle at 37%")
+                                    .log()
+                                    .wait()
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                ,
+                                newController("Question", {q:row.Question, as: ["yes","no"]})
+                                    .center()
+                                    .print("center at 50%", "middle at 44.5%")
+                                    .log()
+                                    .wait()
+                                    .remove()
+                                , // fixation cross for stroop
+                                getImage("fixation")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer(300)
+                                    .start()
+                                    .wait()
+                                ,
+                                getImage("fixation")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // show stroop word
+                                newText("stroop_word", row.Word)
+                                    .color(row.FontColourCode)
+                                    .css("font-size", "1.5em")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer("delay2", 1000)
+                                    .start()
+                                , //timer.stop will stop timer and will not continue it again
+                                newKey("re_stroop", 49, 50, 51)
+                                    .log()
+                                    .callback(getTimer("delay2").stop())
+                                ,
+                                getTimer("delay2")
+                                    .wait()
+                                ,
+                                getText("stroop_word")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
                 )
-            .failure(
-                newController("DashedSentence",{s:row.Sentence})
-                    .print()
-                    .log()
-                    .wait()
-                    .remove()
-                ,
-                newController("Question", {q:row.Question, as: ["yes","no"]})
-                    .print()
-                    .log()
-                    .wait()
-                    .remove()
-                ,
-                newText("Stroop", row.Word)
-                        .color(row.FontColourCode)
-                        .css("font-size", "1.5em")
-                        .print()
-                ,
-                newKey("QWE")
-                    .log()
-                ,
-                newTimer(1000)
-                    .callback(
-                        getText("Stroop").remove())
-                    .start()
-                    .wait()
-                )
-    )
+        )
 .log("Block" , row.Block)
 .log("Group" , row.Group)
-.log("item" , row.Item)
+.log("Item" , row.Item)
 .log("Condition", row.Condition)
     // Add these three columns to the results lines of these Template-based trials
 )
@@ -334,7 +558,7 @@ newTrial("break",
         .css("font-size", "1.5em")
         .print()
     ,
-    newButton("Continue")
+    newButton("&nbsp; Continue &nbsp;")
         .center()
         .css("font-size", "1.5em")
         .print()
@@ -349,64 +573,152 @@ Template(
     row => newTrial( "block2" ,
         newText("TrialType", row.TrialType)
             .test.text("Stroop_Sentence")
-            .success(
-                newText("Stroop", row.Word)
-                    .color(row.FontColourCode)
-                    .css("font-size", "1.5em")
-                    .print()
-                ,
-                newKey("QWE")
-                    .log()
-                ,
-                newTimer(1000)
-                    .callback(
-                        getText("Stroop").remove())
-                    .start()
-                    .wait()
-                ,
-                newController("DashedSentence",{s:row.Sentence})
-                    .print()
-                    .log()
-                    .wait()
-                    .remove()
-                ,
-                newController("Question", {q:row.Question, as: ["yes","no"]})
-                    .print()
-                    .log()
-                    .wait()
-                    .remove()
+                        .success( // fixation cross for stroop                                ,
+                                getImage("fixation")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer(300)
+                                    .start()
+                                    .wait()
+                                ,
+                                getImage("fixation")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // show stroop word
+                                newText("stroop_word", row.Word)
+                                    .color(row.FontColourCode)
+                                    .css("font-size", "1.5em")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer("delay1", 1000)
+                                    .start()
+                                , //timer.stop will stop timer and will not continue it again
+                                newKey("re_stroop", 49, 50, 51)
+                                    .log()
+                                    .callback(getTimer("delay1").stop())
+                                ,
+                                getTimer("delay1")
+                                    .wait()
+                                ,
+                                getText("stroop_word")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // fixation cross for sentence
+                                getImage("fixation")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer(300)
+                                    .start()
+                                    .wait()
+                                ,
+                                getImage("fixation")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // self-paced sentence reading and question
+                                newController("DashedSentence",{s:row.Sentence})
+                                    .center()
+                                    .print("center at 50%", "middle at 37%")
+                                    .log()
+                                    .wait()
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                ,
+                                newController("Question", {q:row.Question, as: ["yes","no"]})
+                                    .center()
+                                    .print("center at 50%", "middle at 44.5%")
+                                    .log()
+                                    .wait()
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                )
+                        .failure( // fixation cross for sentence
+                                getImage("fixation")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer(300)
+                                    .start()
+                                    .wait()
+                                ,
+                                getImage("fixation")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // self-paced sentence reading and question
+                                newController("DashedSentence",{s:row.Sentence})
+                                    .center()
+                                    .print("center at 50%", "middle at 37%")
+                                    .log()
+                                    .wait()
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                ,
+                                newController("Question", {q:row.Question, as: ["yes","no"]})
+                                    .center()
+                                    .print("center at 50%", "middle at 44.5%")
+                                    .log()
+                                    .wait()
+                                    .remove()
+                                , // fixation cross for stroop
+                                getImage("fixation")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer(300)
+                                    .start()
+                                    .wait()
+                                ,
+                                getImage("fixation")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
+                                , // show stroop word
+                                newText("stroop_word", row.Word)
+                                    .color(row.FontColourCode)
+                                    .css("font-size", "1.5em")
+                                    .print("center at 50%", "middle at 37.5%")
+                                ,
+                                newTimer("delay2", 1000)
+                                    .start()
+                                , //timer.stop will stop timer and will not continue it again
+                                newKey("re_stroop", 49, 50, 51)
+                                    .log()
+                                    .callback(getTimer("delay2").stop())
+                                ,
+                                getTimer("delay2")
+                                    .wait()
+                                ,
+                                getText("stroop_word")
+                                    .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
                 )
-            .failure(
-                newController("DashedSentence",{s:row.Sentence})
-                    .print()
-                    .log()
-                    .wait()
-                    .remove()
-                ,
-                newController("Question", {q:row.Question, as: ["yes","no"]})
-                    .print()
-                    .log()
-                    .wait()
-                    .remove()
-                ,
-                newText("Stroop", row.Word)
-                        .color(row.FontColourCode)
-                        .css("font-size", "1.5em")
-                        .print()
-                ,
-                newKey("QWE")
-                    .log()
-                ,
-                newTimer(1000)
-                    .callback(
-                        getText("Stroop").remove())
-                    .start()
-                    .wait()
-                )
-    )
+        )
 .log("Block" , row.Block)
 .log("Group" , row.Group)
-.log("item" , row.Item)
+.log("Item" , row.Item)
 .log("Condition", row.Condition)
     // Add these three columns to the results lines of these Template-based trials
 )
@@ -416,16 +728,16 @@ SendResults()
 // Spaces and linebreaks don't matter to the script: we've only been using them for the sake of readability
 newTrial("bye",
     newText("<br/>This is the end of the experiment.<br/><br/>")
-        .css("font-size", "1.7em")
+        .css("font-size", "1.5em")
         .print()
     ,
-    newButton("Click here to validate your participation.")
-        .css("font-size", "1.7em")
+    newButton("&nbsp; Click here to validate your participation. &nbsp;")
+        .css("font-size", "1.5em")
         .print()
         .wait()
     ,
     newText("<br/><br/><br/><b>Well done! Thanks for your participation.</b>")
-        .css("font-size", "1.7em")
+        .css("font-size", "1.5em")
         .print()
     ,
     newButton("void")
