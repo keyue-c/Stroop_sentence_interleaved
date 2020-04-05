@@ -453,24 +453,38 @@ Template(
                                 newTimer(200)
                                     .start()
                                     .wait()
+                                , // initiate selector and dummy text elements
+                                newSelector("stroop_response")
+                                ,
+                                newText("null","null")
+                                ,
+                                newText("1","Blue")
+                                ,
+                                newText("2","Green")
+                                ,
+                                newText("3","Yellow")
                                 , // show stroop word
-                                newText("stroop_word", row.Word)
+                                newText("stroop", row.Word)
                                     .color(row.FontColourCode)
                                     .css("font-size", "1.5em")
                                     .print("center at 50%", "middle at 37.5%")
                                 ,
-                                newTimer("delay1", 1000)
+                                newTimer("delay", 1000)
+                                    .callback(getText("stroop").remove(),
+                                            getSelector("stroop_response").testNot.selected()
+                                                    .success(getSelector("stroop_response")
+                                                                .select(getText("null"))))
                                     .start()
-                                , //timer.stop will stop timer and will not continue it again
-                                newKey("re_stroop", 49, 50, 51)
+                                ,
+                                getSelector("stroop_response")
+                                    .disableClicks()
+                                    .add(getText("1"), getText("2"), getText("3"))
+                                    .keys(49, 50, 51)
+                                    .add(getText("null"))
+                                    .callback(getTimer("delay").stop()) //timer.stop will stop timer and will not continue it again
                                     .log()
                                     .wait()
-                                ,
-                                getTimer("delay1")
-                                    .stop()
-                                ,
-                                getText("stroop_word")
-                                    .remove()
+                                    .disable()
                                 ,
                                 newTimer(200)
                                     .start()
@@ -544,6 +558,10 @@ Template(
                                     .log()
                                     .wait()
                                     .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
                                 , // fixation cross for stroop
                                 getImage("fixation")
                                     .print("center at 50%", "middle at 37.5%")
@@ -558,24 +576,38 @@ Template(
                                 newTimer(200)
                                     .start()
                                     .wait()
+                                , // initiate selector and dummy text elements
+                                newSelector("stroop_response")
+                                ,
+                                newText("null","null")
+                                ,
+                                newText("1","Blue")
+                                ,
+                                newText("2","Green")
+                                ,
+                                newText("3","Yellow")
                                 , // show stroop word
-                                newText("stroop_word", row.Word)
+                                newText("stroop", row.Word)
                                     .color(row.FontColourCode)
                                     .css("font-size", "1.5em")
                                     .print("center at 50%", "middle at 37.5%")
                                 ,
                                 newTimer("delay2", 1000)
+                                    .callback(getText("stroop").remove(),
+                                            getSelector("stroop_response2").testNot.selected()
+                                                    .success(getSelector("stroop_response2")
+                                                                .select(getText("null"))))
                                     .start()
-                                , //timer.stop will stop timer and will not continue it again
-                                newKey("re_stroop", 49, 50, 51)
+                                ,
+                                getSelector("stroop_response2")
+                                    .disableClicks()
+                                    .add(getText("1"), getText("2"), getText("3"))
+                                    .keys(49, 50, 51)
+                                    .add(getText("null"))
+                                    .callback(getTimer("delay2").stop()) //timer.stop will stop timer and will not continue it again
                                     .log()
                                     .wait()
-                                ,
-                                getTimer("delay1")
-                                    .stop()
-                                ,
-                                getText("stroop_word")
-                                    .remove()
+                                    .disable()
                                 ,
                                 newTimer(200)
                                     .start()
@@ -660,24 +692,38 @@ Template(
                                 newTimer(200)
                                     .start()
                                     .wait()
+                                , // initiate selector and dummy text elements
+                                newSelector("stroop_response")
+                                ,
+                                newText("null","null")
+                                ,
+                                newText("1","Blue")
+                                ,
+                                newText("2","Green")
+                                ,
+                                newText("3","Yellow")
                                 , // show stroop word
-                                newText("stroop_word", row.Word)
+                                newText("stroop", row.Word)
                                     .color(row.FontColourCode)
                                     .css("font-size", "1.5em")
                                     .print("center at 50%", "middle at 37.5%")
                                 ,
-                                newTimer("delay1", 1000)
+                                newTimer("delay", 1000)
+                                    .callback(getText("stroop").remove(),
+                                            getSelector("stroop_response").testNot.selected()
+                                                    .success(getSelector("stroop_response")
+                                                                .select(getText("null"))))
                                     .start()
-                                , //timer.stop will stop timer and will not continue it again
-                                newKey("re_stroop", 49, 50, 51)
+                                ,
+                                getSelector("stroop_response")
+                                    .disableClicks()
+                                    .add(getText("1"), getText("2"), getText("3"))
+                                    .keys(49, 50, 51)
+                                    .add(getText("null"))
+                                    .callback(getTimer("delay").stop()) //timer.stop will stop timer and will not continue it again
                                     .log()
                                     .wait()
-                                ,
-                                getTimer("delay1")
-                                    .stop()
-                                ,
-                                getText("stroop_word")
-                                    .remove()
+                                    .disable()
                                 ,
                                 newTimer(200)
                                     .start()
@@ -751,6 +797,10 @@ Template(
                                     .log()
                                     .wait()
                                     .remove()
+                                ,
+                                newTimer(200)
+                                    .start()
+                                    .wait()
                                 , // fixation cross for stroop
                                 getImage("fixation")
                                     .print("center at 50%", "middle at 37.5%")
@@ -765,24 +815,38 @@ Template(
                                 newTimer(200)
                                     .start()
                                     .wait()
+                                , // initiate selector and dummy text elements
+                                newSelector("stroop_response")
+                                ,
+                                newText("null","null")
+                                ,
+                                newText("1","Blue")
+                                ,
+                                newText("2","Green")
+                                ,
+                                newText("3","Yellow")
                                 , // show stroop word
-                                newText("stroop_word", row.Word)
+                                newText("stroop", row.Word)
                                     .color(row.FontColourCode)
                                     .css("font-size", "1.5em")
                                     .print("center at 50%", "middle at 37.5%")
                                 ,
                                 newTimer("delay2", 1000)
+                                    .callback(getText("stroop").remove(),
+                                            getSelector("stroop_response2").testNot.selected()
+                                                    .success(getSelector("stroop_response2")
+                                                                .select(getText("null"))))
                                     .start()
-                                , //timer.stop will stop timer and will not continue it again
-                                newKey("re_stroop", 49, 50, 51)
+                                ,
+                                getSelector("stroop_response2")
+                                    .disableClicks()
+                                    .add(getText("1"), getText("2"), getText("3"))
+                                    .keys(49, 50, 51)
+                                    .add(getText("null"))
+                                    .callback(getTimer("delay2").stop()) //timer.stop will stop timer and will not continue it again
                                     .log()
                                     .wait()
-                                ,
-                                getTimer("delay1")
-                                    .stop()
-                                ,
-                                getText("stroop_word")
-                                    .remove()
+                                    .disable()
                                 ,
                                 newTimer(200)
                                     .start()
