@@ -3,7 +3,8 @@ PennController.ResetPrefix(null) // Shorten command names (keep this line here)
 // Show the 'intro' trial first, then all the 'experiment' trials in a random order
 // then send the results and finally show the trial labeled 'bye'
 Sequence( "intro", "practice_color", randomize("color_matching"), "end_color_matching", "practice_stroop", randomize("stroop"), 
-            "practice_combined", randomize("practice"), "exp_instru", randomize("block1"), "break", randomize("block2"), SendResults(), "bye" )
+            "practice_combined", randomize("practice"), "exp_instru", "countdown1", randomize("block1"), "break", "countdown2", 
+            randomize("block2"), SendResults(), "bye" )
 
 
 // What is in Header happens at the beginning of every single trial
@@ -28,6 +29,7 @@ Header(
 )
 .log( "ID" , getVar("ID") )
 // This log command adds a column reporting the participant's name to every line saved to the results
+
 
 // Part1 information and consent
 newTrial( "intro" ,
@@ -235,6 +237,7 @@ newTrial("practice_combined",
         .wait()
 )
 
+
 Template( "practice_combined_ibex.csv" ,
     // Row will iteratively point to every row in practice_combined_ibex.csv
     row => newTrial( "practice" ,
@@ -396,6 +399,40 @@ newTrial("exp_instru",
     
 )
 
+
+newTrial("countdown1",
+    newText("three","<b>3</b>")
+        .css("font-size", "2em")
+        .print("center at 50%", "middle at 37.5%")
+    ,
+    newTimer(1000)
+        .callback(getText("three").remove())
+        .start()
+        .wait()
+    ,
+    newText("two","<b>2</b>")
+        .css("font-size", "2em")
+        .print("center at 50%", "middle at 37.5%")
+    ,
+    newTimer(1000)
+        .callback(getText("two").remove())
+        .start()
+        .wait()
+    ,
+    newText("one","<b>1</b>")
+        .css("font-size", "2em")
+        .print("center at 50%", "middle at 37.5%")
+    ,
+    newTimer(1000)
+        .callback(getText("one").remove())
+        .start()
+        .wait()
+    ,
+    newTimer(500)
+        .start()
+        .wait()
+)
+
 Template(
         GetTable("stimuli_ibex_test_2blocks.csv")
         .filter("Block", "1"),
@@ -427,10 +464,10 @@ Template(
                                 , //timer.stop will stop timer and will not continue it again
                                 newKey("re_stroop", 49, 50, 51)
                                     .log()
-                                    .callback(getTimer("delay1").stop())
+                                    .wait()
                                 ,
                                 getTimer("delay1")
-                                    .wait()
+                                    .stop()
                                 ,
                                 getText("stroop_word")
                                     .remove()
@@ -532,10 +569,10 @@ Template(
                                 , //timer.stop will stop timer and will not continue it again
                                 newKey("re_stroop", 49, 50, 51)
                                     .log()
-                                    .callback(getTimer("delay2").stop())
-                                ,
-                                getTimer("delay2")
                                     .wait()
+                                ,
+                                getTimer("delay1")
+                                    .stop()
                                 ,
                                 getText("stroop_word")
                                     .remove()
@@ -549,6 +586,8 @@ Template(
 .log("Group" , row.Group)
 .log("Item" , row.Item)
 .log("Condition", row.Condition)
+.log("Stroop_answer", row.Button)
+.log("Question_answer", row.Answer)
     // Add these three columns to the results lines of these Template-based trials
 )
 
@@ -565,6 +604,40 @@ newTrial("break",
         .wait()
 )
 
+
+newTrial("countdown2",
+    newText("three","<b>3</b>")
+        .css("font-size", "2em")
+        .print("center at 50%", "middle at 37.5%")
+    ,
+    newTimer(1000)
+        .callback(getText("three").remove())
+        .start()
+        .wait()
+    ,
+    newText("two","<b>2</b>")
+        .css("font-size", "2em")
+        .print("center at 50%", "middle at 37.5%")
+    ,
+    newTimer(1000)
+        .callback(getText("two").remove())
+        .start()
+        .wait()
+    ,
+    newText("one","<b>1</b>")
+        .css("font-size", "2em")
+        .print("center at 50%", "middle at 37.5%")
+    ,
+    newTimer(1000)
+        .callback(getText("one").remove())
+        .start()
+        .wait()
+    ,
+    newTimer(500)
+        .start()
+        .wait()
+)
+
 // This Template command generates as many trials as there are rows in stimuli_ibex.csv
 Template(
         GetTable("stimuli_ibex_test_2blocks.csv")
@@ -573,7 +646,7 @@ Template(
     row => newTrial( "block2" ,
         newText("TrialType", row.TrialType)
             .test.text("Stroop_Sentence")
-                        .success( // fixation cross for stroop                                ,
+                        .success( // fixation cross for stroop,
                                 getImage("fixation")
                                     .print("center at 50%", "middle at 37.5%")
                                 ,
@@ -598,10 +671,10 @@ Template(
                                 , //timer.stop will stop timer and will not continue it again
                                 newKey("re_stroop", 49, 50, 51)
                                     .log()
-                                    .callback(getTimer("delay1").stop())
+                                    .wait()
                                 ,
                                 getTimer("delay1")
-                                    .wait()
+                                    .stop()
                                 ,
                                 getText("stroop_word")
                                     .remove()
@@ -703,10 +776,10 @@ Template(
                                 , //timer.stop will stop timer and will not continue it again
                                 newKey("re_stroop", 49, 50, 51)
                                     .log()
-                                    .callback(getTimer("delay2").stop())
-                                ,
-                                getTimer("delay2")
                                     .wait()
+                                ,
+                                getTimer("delay1")
+                                    .stop()
                                 ,
                                 getText("stroop_word")
                                     .remove()
@@ -720,6 +793,8 @@ Template(
 .log("Group" , row.Group)
 .log("Item" , row.Item)
 .log("Condition", row.Condition)
+.log("Stroop_answer", row.Button)
+.log("Question_answer", row.Answer)
     // Add these three columns to the results lines of these Template-based trials
 )
 

@@ -1,4 +1,4 @@
-﻿Block,Group,Item,Condition,Sentence,Question,Answer,FontColour,FontColourCode,Word,StroopButton ,TrialType
+Block,Group,Item,Condition,Sentence,Question,Answer,FontColour,FontColourCode,Word,Button,TrialType
 1,1,1,A,The thoughtless secretaries called on the balcony returned to their desks.,Did someone call the secretaries while they were on the balcony?,1,Blue,"rgb(0, 0, 255)",Blue,1,Stroop_Sentence
 1,2,1,B,The thoughtless secretaries who were called on the balcony returned to their desks.,Did someone call the secretaries while they were on the balcony?,1,Blue,"rgb(0, 0, 255)",Brown,1,Stroop_Sentence
 1,3,1,C,The thoughtless secretaries called on the balcony returned to their desks.,Did someone call the secretaries while they were on the balcony?,1,Blue,"rgb(0, 0, 255)",Orange,1,Stroop_Sentence
