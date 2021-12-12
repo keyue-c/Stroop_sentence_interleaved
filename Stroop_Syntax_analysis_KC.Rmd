@@ -1,0 +1,734 @@
+---
+title: 'Reassessing Cognitive Control Engagement in Garden Path Sentence Recovery'
+output: html_document
+---
+  
+```{r setup, include=FALSE}
+rm(list = ls())
+library(dplyr)
+library(plyr)
+library(data.table)
+library(stringr)
+library(ggplot2)
+library(lme4)
+library(lmerTest)
+```
+
+## Overview
+
+This document contains the code to reproduce all the figures and statistical analyses for our experiment. You can download the data.
+
+This document has five sections:
+
+1. [Brief summary of the experimental setup](#intro)
+2. [Loading data and inspecting accuracy and RTs](#inspect)
+3. [Defining functions and filtering data](#setup)
+4. [Analysis 1: Measuring the change in reading times over time](#analysis1)
+    * [Disambiguating region](#disamb)
+    * [Ambiguous region](#amb)
+    * [Final region](#fin)
+
+
+## Brief summary {#intro}
+
+English Interleaved Stroop and SPR tasks that were modified and combined from Hsu & Novick (2016) and Fine & Jaeger (2016)
+
+Conditions:
+
+* A(CA): Congruent Stroop to ambiguous sentence
+* B(IU): Incongruent Stroop to unambiguous sentence
+* C(IA): Incongruent Stroop to ambiguous sentence
+* D(CU): Congruent Stroop to unambiguous sentence
+
+Examples:
+
+* **A(CA)**:  <span style="color: blue;">Blue</span>  ---  Some rescue workers advised about the avalanche decided to stand by. 
+* **B(IU)**:  <span style="color: blue;">Red</span>  ---  Some rescue workers *who were* advised about the avalanche decided to stand by. 
+* **C(IA)**:  <span style="color: blue;">Red</span>  ---  Some rescue workers advised about the avalanche decided to stand by. 
+* **D(CU)**:  <span style="color: blue;">Blue</span>  ---  Some rescue workers *who were* advised about the avalanche decided to stand by. 
+
+Overview of the experimental design:
+
+* Every experimental item was preceded by stroop; fillers could either be preceded or proceded by the stroop task.
+* Every sentence was followed by a yes/no comprehension question. The answer to the CQ is alsways yes for experimental items.
+* There are 16 pseudorandomized lists: 4 counterbalanced conditions x 2 pseudorandomizations x 2 directions
+* Pseudorandomization criteria: 
+  * No more than 3 "yes" or "no" question responses in a row.
+  * Critical items do not occur in consecutive trials.
+  * The same ambiguity condition cannot be repeated more than 2 times in a row.
+  * The same Stroop condition cannot be repeated more than 3 times consecutively.
+  * The experiment begins and ends with fillers, so does every block.
+
+## Loading and inspecting the data {#inspect}
+
+### Loading data
+```{r, cache = TRUE}
+file_list <- list.files(pattern = "data")
+df <- ldply(file_list, fread, fill=TRUE)
+
+# keep columns we need
+names(df) <- str_replace_all(names(df), c(" " = "." , "," = "" ))
+keeps <- c("Participant.Private.ID","Screen.Name","Reaction.Time","Timed.Out","Response", "Attempt","Correct","LIST","Block","TRIAL","Exp.Item.TRIAL","Condition", "Item","Ambiguity","Stroop")
+df <- df[keeps]
+names(df)[names(df) == "Participant.Private.ID"] <- "ID"
+
+# keep rows we need
+df <- subset(df, df$Response!="Content End" & df$Screen.Name=="Sentence"|df$Screen.Name=="Question"|df$Screen.Name=="Stroop")
+
+# Set factors and variables to appropriate format
+df$ID <- as.factor(df$ID)
+df$Screen.Name <- as.character(df$Screen.Name)
+df$Reaction.Time <- as.numeric(df$Reaction.Time)
+df$Timed.Out <- as.numeric(df$Timed.Out)
+df$Response <- as.character(df$Response)
+df$Attempt <- as.numeric(df$Attempt)
+df$Correct <- as.numeric(df$Correct)
+df$LIST <- as.factor(df$LIST)
+df$Block <- as.factor(df$Block)
+df$TRIAL <- as.numeric(df$TRIAL)
+df$Exp.Item.TRIAL <- as.numeric(df$Exp.Item.TRIAL)
+df$Condition <- as.factor(df$Condition)
+df$Item <- as.factor(df$Item)
+df$Ambiguity <- as.factor(df$Ambiguity)
+df$Stroop <- as.factor(df$Stroop)
+df$Word.Length <- nchar(df$Response)
+
+# Remove Practice Trials
+df <- subset(df, Condition!= "P")
+
+# Create unique Subject IDs that are simpler (ie, 1, 2, 3, 4 etc)
+df <- transform(df, Subject=match(df$ID, unique(df$ID)))
+df$Subject <- as.factor(df$Subject)
+
+# number of participants
+max(as.integer(df$Subject))
+```
+
+### Inspect comprehension question accuracy
+
+#### Overall accuracy
+```{r, cache = TRUE}
+df_cq <- subset(df, df$Screen.Name == "Question")
+
+# overall CQ accuracy
+mean(df_cq$Correct)
+# CQ accuracy of fillers
+mean(df_cq$Correct[df_cq$Condition=="F"])
+# CQ accuracy of critical sentences
+mean(df_cq$Correct[df_cq$Ambiguity=="Amb"])
+mean(df_cq$Correct[df_cq$Ambiguity=="Unamb"])
+```
+
+#### Accuracy by participant
+```{r, cache = TRUE, fig.height=4, fig.width=6}
+# by participant filler sentence CQ accuracy
+cq_acc_bypart <- ddply(df_cq, .(ID, Subject, LIST, Ambiguity), function(x) mean(x$Correct, na.rm=T))
+cq_acc_bypart_filler <- subset(cq_acc_bypart, Ambiguity == "filler")
+ggplot(cq_acc_bypart_filler, aes(x = Subject, y = V1)) + 
+  geom_point() + labs(title = "Mean accuracy for fillers by participant", x = "Participants", y = "Accuracy") + 
+  ylim(0.5,1) + geom_hline(yintercept=0.8)
+print(subset(cq_acc_bypart_filler, V1 < 0.8))
+
+# by participant ambiguous & unambiguous sentence CQ accuracy
+cq_acc_critical <- subset(cq_acc_bypart, Ambiguity != "filler")
+ggplot(cq_acc_critical, aes(x = Subject, y = V1, group = Ambiguity, color = Ambiguity)) + 
+  geom_point() + labs(title = "Mean accuracy for critical sentences by participant", x = "Participants", y = "Accuracy") + 
+  ylim(0.5,1) + geom_hline(yintercept=mean(cq_acc_critical$V1) - 2.5*sd(cq_acc_critical$V1))
+print(subset(cq_acc_critical, V1 < mean(cq_acc_critical$V1) - 2.5*sd(cq_acc_critical$V1)))
+```
+
+#### Accuracy by item
+```{r, cache = TRUE, fig.height=4, fig.width=6}
+# by filler item CQ accuracy
+cq_acc_byitem <- ddply(df_cq, .(Item, Ambiguity), function(x) mean(x$Correct, na.rm=T))
+cq_acc_byitem_filler <- subset(cq_acc_byitem, Ambiguity == "filler")
+ggplot(cq_acc_byitem_filler, aes(x = Item, y = V1)) + 
+  geom_point() + labs(title = "Mean accuracy for fillers by item", x = "Filler item number", y = "Accuracy") + 
+  geom_hline(yintercept=mean(cq_acc_byitem_filler$V1) - 2.5*sd(cq_acc_byitem_filler$V1))
+filler_low_acc <- subset(cq_acc_byitem_filler, V1 < mean(cq_acc_byitem_filler$V1) - 2.5*sd(cq_acc_byitem_filler$V1))
+print(filler_low_acc)
+
+# by participant filler sentence CQ accuracy (excluding low acc fillers)
+cq_acc_bypart_byitem <- ddply(df_cq, .(ID, Subject, LIST, Item, Ambiguity), function(x) mean(x$Correct, na.rm=T))
+cq_acc_bypart_byitem_filler <- subset(cq_acc_bypart_byitem, Ambiguity == "filler")
+cq_acc_bypart_byitem_filler_noout <- subset(cq_acc_bypart_byitem_filler, !(Item %in% filler_low_acc$Item))
+cq_acc_bypart_noout <- ddply(cq_acc_bypart_byitem_filler_noout, .(ID, Subject, LIST, Ambiguity), function(x) mean(x$V1, na.rm=T))
+ggplot(cq_acc_bypart_noout, aes(x = Subject, y = V1)) + 
+  geom_point() + labs(title = "Mean accuracy for fillers by participant (low-accuracy fillers excluded)", x = "Participants", y = "Accuracy") + 
+  ylim(0.5,1) + geom_hline(yintercept=0.8)
+print(subset(cq_acc_bypart_noout, V1 < 0.8))
+
+# by critical item CQ accuracy
+cq_acc_byitem_critical <- subset(cq_acc_byitem, Ambiguity != "filler")
+ggplot(cq_acc_byitem_critical, aes(x = Item, y = V1, group = Ambiguity, color = Ambiguity)) + 
+  geom_point() + labs(title = "Mean accuracy for critical sentences by item", x = "Critical item number", y = "Accuracy") + 
+  geom_hline(yintercept=mean(cq_acc_byitem_critical$V1) - 2.5*sd(cq_acc_byitem_critical$V1))
+print(subset(cq_acc_byitem_critical, V1 < mean(cq_acc_byitem_critical$V1) - 2.5*sd(cq_acc_byitem_critical$V1)))
+```
+
+#### Accuracy by half
+```{r, cache = TRUE}
+# CQ accuracy by first half and second half
+cq_first <- subset(df_cq, TRIAL < 55)
+cq_second <- subset(df_cq, TRIAL > 54)
+mean(cq_first$Correct)
+mean(cq_second$Correct)
+```
+
+### Inspect Stroop accuracy
+
+#### Missed Stroop responses
+```{r, cache = TRUE, fig.height=4, fig.width=6}
+df_stroop <- subset(df, df$Screen.Name == "Stroop")
+
+# How many missed responses
+sum(!is.na(df_stroop$Timed.Out))
+
+# by participant missing rate
+str_miss <- ddply(df_stroop, .(ID, Subject, LIST), function(x) sum(!is.na(x$Timed.Out)))
+str_miss$Miss.Rate <- str_miss$V1/108
+ggplot(str_miss, aes(x = Subject, y = Miss.Rate)) + 
+  geom_point() + labs(title = "Missing rate of Stroop by participant", x = "Participants", y = "Missing rate") + 
+  ylim(0,0.5) + geom_hline(yintercept=0.15)
+print(subset(str_miss, Miss.Rate > 0.15))
+```
+
+#### Stroop accuracy
+```{r, cache = TRUE, fig.height=4, fig.width=6}
+# overall Stroop accuracy 
+mean(df_stroop$Correct)
+# I/C Stroop accuracy
+mean(df_stroop$Correct[df_stroop$Stroop=="I"])
+mean(df_stroop$Correct[df_stroop$Stroop=="C"])
+
+# by participant overall Stroop accuracy (including missed responses)
+str_acc <- ddply(df_stroop, .(ID, Subject, LIST), function(x) mean(x$Correct))
+ggplot(str_acc, aes(x = Subject, y = V1)) + 
+  geom_point() + labs(title = "Stroop accuracy by participant (missed responses included)", x = "Participants", y = "Stroop Accuracy") + 
+  ylim(0.4, 1) + geom_hline(yintercept=0.8)
+print(subset(str_acc, V1 < 0.8))
+
+# filter missed Stroop responses
+df_stroop <- df_stroop %>% filter(is.na(df_stroop$Timed.Out)=="TRUE")
+
+# overall Stroop accuracy excluding missing data
+mean(df_stroop$Correct)
+# I/C Stroop accuracy excluding missing data
+mean(df_stroop$Correct[df_stroop$Stroop=="I"])
+mean(df_stroop$Correct[df_stroop$Stroop=="C"])
+
+# by participant overall Stroop accuracy excluding missing data
+str_acc_nomiss <- ddply(df_stroop, .(ID, Subject, LIST), function(x) mean(x$Correct, na.rm = T))
+ggplot(str_acc_nomiss, aes(x = Subject, y = V1)) + 
+  geom_point() + labs(title = "Stroop accuracy by participant (missed responses excluded)", x = "Participants", y = "Stroop Accuracy") + 
+  ylim(0.5, 1) + geom_hline(yintercept=0.85)
+print(subset(str_acc_nomiss, V1 < 0.85))
+```
+
+### Inspect Stroop RTs (missed responses excluded)
+
+#### Overall & by-half Stroop RTs
+```{r, cache = TRUE}
+# summarise Stroop overall RTs
+summary(df_stroop$Reaction.Time)
+# summarise I/C Stroop RTs
+summary(df_stroop$Reaction.Time[df_stroop$Stroop=="I"])
+summary(df_stroop$Reaction.Time[df_stroop$Stroop=="C"])
+
+# Stroop by first half and second half
+df_stroop$Half[df_stroop$TRIAL < 55] <- "first"
+df_stroop$Half[df_stroop$TRIAL > 54] <- "second"
+ddply(df_stroop, .(Half, Stroop), function(x) mean(x$Reaction.Time, na.rm = TRUE))
+
+# test Half x Stroop
+byhalf_lm <- lm(formula = Reaction.Time ~ Stroop * Half, data = df_stroop)
+summary(byhalf_lm)
+```
+
+#### Stroop RTs by trials
+
+```{r, cache = TRUE, fig.height=4, fig.width=6}
+# Stroop RTs by congruency by trials
+str_bytrial <- ddply(df_stroop, .(TRIAL, Stroop), function(x) mean(x$Reaction.Time))
+ggplot(str_bytrial, aes(TRIAL, V1, group = Stroop, colour = Stroop, fill = Stroop)) +
+  geom_point() + 
+  guides(fill=FALSE) + 
+  geom_smooth(method = lm, formula = y ~ log(x)) + 
+  labs(x = 'Trial number', y = 'Average Stroop RTs across participants', colour = 'Stroop')
+
+# Stroop effect (I-C) by trials
+str_bytrial_I <- subset(str_bytrial, Stroop == "I")
+str_bytrial_C <- subset(str_bytrial, Stroop == "C")
+str_diff_bytrial <- str_bytrial_I
+str_diff_bytrial$CRT <- str_bytrial_C$V1
+str_diff_bytrial$Diff <- str_bytrial_I$V1 - str_bytrial_C$V1
+names(str_diff_bytrial)[names(str_diff_bytrial)=="V1"] <- "IRT"
+str_diff_bytrial$Stroop <- "Diff"
+ggplot(str_diff_bytrial, aes(TRIAL, Diff)) +
+  geom_point(color="lightblue") + 
+  guides(fill=FALSE) + 
+  geom_smooth(method = lm, formula = y ~ log(x)) + 
+  labs(x = 'Trial number', y = 'Average Stroop differences (I-C) across participants')
+```
+
+## Defining functions and filtering data {#setup}
+
+### Defining functions
+```{r, cache = TRUE}
+data_summary <- function(data, varname, groupnames){
+  require(plyr)
+  length2 <- function (x, na.rm=FALSE) {
+    if (na.rm) sum(!is.na(x))
+    else       length(x)
+  }
+  summary_func <- function(x, col){
+    c(N    = length2(x[[col]], na.rm=TRUE),
+      mean = mean(x[[col]], na.rm=TRUE),
+      sd = sd(x[[col]], na.rm=TRUE))
+  }
+  data_sum<-ddply(data, groupnames, .fun=summary_func,
+                  varname)
+  data_sum <- rename(data_sum, c("mean" = varname))
+  
+  data_sum$se <- data_sum$sd / sqrt(data_sum$N)
+  
+  ciMult <- qt(0.95/2 + .5, data_sum$N-1)
+  data_sum$ci <- data_sum$se * ciMult
+  return(data_sum)
+}
+
+# center but not scale the data
+c. <- function(x) scale(x, scale = FALSE)
+
+# segment sentence into 4 (or 5) regions (use "Attempt" column) into separate df
+# start: the position the region starts; end: the position the region ends (a- ambiguous, u- unambiguous)
+# new_d: the new df to store the region
+segment <- function(d, a_start, a_end, u_start, u_end, region_name){
+  var_rows_amb <- subset(d, d$Ambiguity == "Amb")
+  new_amb <- subset(var_rows_amb, var_rows_amb[["Attempt"]] >= a_start & var_rows_amb[["Attempt"]] <= a_end)
+  new_amb$Region <- region_name
+  var_rows_unamb <- subset(d, d$Ambiguity == "Unamb")
+  new_unamb <- subset(var_rows_unamb, var_rows_unamb[["Attempt"]] >= u_start & var_rows_unamb[["Attempt"]] <= u_end)
+  new_unamb$Region <- region_name
+  new_d <- rbind(new_amb, new_unamb)
+  return(new_d)
+}
+
+# segment relativizer (only unambiguous sentences have relativizers)
+segment_2 <- function(d, u_start, u_end, region_name){
+  var_rows_unamb <- subset(d, d$Ambiguity == "Unamb")
+  new_unamb <- subset(var_rows_unamb, var_rows_unamb[["Attempt"]] >= u_start & var_rows_unamb[["Attempt"]] <= u_end)
+  new_unamb$Region <- region_name
+  return(new_unamb)
+}
+```
+
+### Attaching CQ accuracy to sentence 
+```{r, cache = TRUE}
+# If the CQ answer of the sentence is correct, the "Correct" value of all words for that sentence is set to 1
+sentence <- subset(df, Screen.Name == "Sentence")
+question <- subset(df, Screen.Name == "Question")
+one_part_correct_sen <- NULL
+all_part_correct_sen <- NULL
+one_part_incorrect_sen <- NULL
+all_part_incorrect_sen <- NULL
+for (i in unique(sentence$Subject)){
+  one_part_q <- subset(question, Subject == i)
+  correct_item <- subset(one_part_q, Correct == 1)$Item
+  one_part_correct_sen <- subset(sentence, Subject == i)
+  one_part_correct_sen <- subset(one_part_correct_sen, Item %in% correct_item)
+  all_part_correct_sen <- rbind(all_part_correct_sen, one_part_correct_sen)
+  incorrect_item <- subset(one_part_q, Correct == 0)$Item
+  one_part_incorrect_sen <- subset(sentence, Subject == i)
+  one_part_incorrect_sen <- subset(one_part_incorrect_sen, Item %in% incorrect_item)
+  all_part_incorrect_sen <- rbind(all_part_incorrect_sen, one_part_incorrect_sen)
+}
+all_part_correct_sen$Correct <- 1
+sentence <- rbind(all_part_correct_sen, all_part_incorrect_sen)
+```
+
+### Adding "Region" column to the data frame 
+```{r, cache = TRUE}
+# get sentences (fillers and critical sentences)
+dfc_sentence <- subset(sentence, Condition != "F")
+filler_sentence <- subset(sentence, Condition == "F")
+
+# add Region column to the sentences
+# 4 (or 5) regions： Subject, (Relative), Ambiguous, Disambiguous, Final
+region_sub <- segment(dfc_sentence, 2,3,2,3, "Subject")
+region_amb <- segment(dfc_sentence, 4,7,6,9, "Ambiguous")
+region_dis <- segment(dfc_sentence, 8,10,10,12, "Disambiguating")
+region_fin <- segment(dfc_sentence, 11,11,13,13, "Final")
+region_fir <- segment(dfc_sentence, 1, 1, 1, 1, "First")
+region_re <- segment_2(dfc_sentence, 4,5, "Relative")
+dfc_sentence <- rbind(region_fir, region_sub, region_amb,region_dis,region_fin,region_re)
+dfc_sentence$Region <- factor(dfc_sentence$Region, levels = c('First', 'Subject', 'Relative', 'Ambiguous', 'Disambiguating', 'Final'))
+filler_sentence$Region <- NA
+sentence <- rbind(dfc_sentence, filler_sentence)
+```
+
+### Filtering the data
+```{r, cache = TRUE, fig.height=4, fig.width=6}
+# Exclude participants with filler CQ accuracy less than 0.8
+fillers_q <- subset(df, Screen.Name == "Question" & Condition == "F")
+mean_accs_allfillers_byparticipant <- ddply(fillers_q, .(Subject, LIST), function(x) mean(x$Correct, na.rm = T))
+accurate_q <- subset(sentence, Subject %in% mean_accs_allfillers_byparticipant[mean_accs_allfillers_byparticipant$V1 > 0.8, ]$Subject)
+
+# Excluded participants
+print(unique(mean_accs_allfillers_byparticipant$Subject[mean_accs_allfillers_byparticipant$V1 < 0.8]))
+
+# filter participants based on overall Stroop accuracy (0.8)
+str <- subset(df, Screen.Name == "Stroop")
+str_by_sub <- ddply(str, .(Subject), function(x) mean(x$Correct))
+str_bad_part <- subset(str_by_sub, V1 < 0.8)$Subject
+accurate_str <- subset(accurate_q, !(Subject %in% str_bad_part))
+
+# Excluded participants (note: Subject 80 overlap with participants exlcuded for low filler accuracy)
+print(str_bad_part)
+
+# Exclude observations with RTs less than 100 and greater than 2000 ms
+no_outliers <- subset(accurate_str, Reaction.Time > 100 & Reaction.Time < 2000)
+
+# Exclude the first word before calculating residuals
+no_first <- subset(no_outliers, Attempt != 1)
+
+# Exclude items where CQ answers are wrong
+no_wrong <- subset(no_first, Correct == 1)
+wrong <- subset(no_first, Correct == 0)
+
+# Length correction
+mixed_model <- lmer(log(Reaction.Time) ~ scale(Word.Length) + (1|Subject), no_wrong)
+no_wrong$corrected_log_rt <- residuals(mixed_model)
+
+# Exclude participants with mean RTs lower than 3 sds from mean RT for all participants
+mean_rt_bypart <- data_summary(no_wrong, "corrected_log_rt", groupnames = c("ID","Subject"))
+ggplot(mean_rt_bypart, aes(x = Subject, y = corrected_log_rt)) + geom_point() + 
+    labs(title = "Mean residualised RTs by participant") +
+    geom_hline(yintercept=mean(mean_rt_bypart$corrected_log_rt) + 3*sd(mean_rt_bypart$corrected_log_rt)) +
+    geom_hline(yintercept=mean(mean_rt_bypart$corrected_log_rt) - 3*sd(mean_rt_bypart$corrected_log_rt))
+
+slow_parts <- subset(mean_rt_bypart, corrected_log_rt > mean(mean_rt_bypart$corrected_log_rt) + 3 * sd(mean_rt_bypart$corrected_log_rt))
+no_slow_parts <- subset(no_wrong, !(Subject %in% unique(slow_parts$Subject)))
+
+# Excluded participants
+print(unique(slow_parts$Subject))
+```
+
+### Summarising filtering
+```{r, cache = TRUE}
+# Number of participants excluded because of CQ accuracy
+length(unique(df$Subject)) - length(unique(accurate_q$Subject))
+
+# Number of participants further excluded because of Stroop accuracy
+length(unique(accurate_q$Subject)) - length(unique(accurate_str$Subject))
+
+# % trials with RT < 100 or RT > 2000 excluded
+(nrow(accurate_str) - nrow(no_outliers)) * 100/nrow(accurate_str)
+
+# Total % of incorrect trials excluded
+nrow(wrong) * 100/nrow(no_first)
+
+# % Incorrect filler trials excluded
+nrow(subset(wrong, Condition == "F")) * 100/nrow(subset(no_first, Condition == "F"))
+
+# % Incorrect ambiguous trials excluded
+nrow(subset(wrong, Ambiguity == "Amb")) * 100/nrow(subset(no_first, Condition != "F"))
+
+# % Incorrect unambiguous trials excluded
+nrow(subset(wrong, Ambiguity == "Unamb")) * 100/nrow(subset(no_first, Condition != "F"))
+
+# Number of slow participants excluded
+length(unique(accurate_str$Subject)) - length(unique(no_slow_parts$Subject))
+```
+
+## Analysis 1: Reading Times {#analysis1}
+
+### Average RTs of five regions in A/U sentences 
+```{r, cache = TRUE, fig.height=4, fig.width=6}
+critical <- subset(no_slow_parts, Condition != "F")
+
+by_region <- data_summary(critical, "corrected_log_rt", groupnames = c("Region", "Ambiguity"))
+
+ggplot(by_region, aes(Region, corrected_log_rt, colour = Ambiguity, shape = Ambiguity, linetype = Ambiguity, group = Ambiguity)) + 
+    geom_point(position = position_dodge(0.05)) + geom_line() + 
+    geom_errorbar(aes(ymin = corrected_log_rt - ci, ymax = corrected_log_rt + ci), width = 0.2, position = position_dodge(0.05)) + 
+    labs(x = " ", y = "Length corrected log RTs",colour = "Ambiguity", shape = "Ambiguity", linetype = "Ambiguity") + 
+    scale_x_discrete(labels = c('Subject', 'Relative', 'Ambiguous', 'Disambiguating', 'Final')) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.title.x = element_blank())
+```
+
+### Disambiguating region {#disamb}
+
+#### Disambiguating region: Garden path effect by critical item order
+```{r, cache = TRUE, fig.height=4, fig.width=6}
+# RTs corrected for stimulus order, fit with a log curve (replicating Fine & Jaeger, 2016)
+mixed_model_sent_num <- lm(corrected_log_rt ~ TRIAL, critical)
+critical$sentnum_corrected_rt <- residuals(mixed_model_sent_num)
+
+by_critnum_sentnumcorrected <- data_summary(subset(critical, Region == "Disambiguating"), "sentnum_corrected_rt", groupnames = c("Exp.Item.TRIAL", "Ambiguity"))
+
+ggplot(by_critnum_sentnumcorrected, aes(Exp.Item.TRIAL, sentnum_corrected_rt, group = Ambiguity, colour = Ambiguity, fill = Ambiguity, shape = Ambiguity, linetype = Ambiguity)) + 
+	geom_point() + guides(fill = FALSE) + geom_smooth(method = lm, formula = y ~ log(x)) + 
+  labs(x = "# RCs seen", y = "Length and order corrected RT", colour = "Ambiguity", shape = "Ambiguity", linetype = "Ambiguity")
+
+# RTs not corrected for stimulus number, fit with a loess curve (Prasad & Linzen, submitted)
+by_critnum <- data_summary(subset(critical, Region == "Disambiguating"), "corrected_log_rt", groupnames = c("Exp.Item.TRIAL", "Ambiguity"))
+ggplot(by_critnum, aes(Exp.Item.TRIAL, corrected_log_rt, group = Ambiguity, colour = Ambiguity, fill = Ambiguity, shape = Ambiguity, linetype = Ambiguity)) + 
+	geom_point() + geom_smooth() + 
+  labs(x = "# RCs seen", y = "Length corrected log RT", colour = "Ambiguity", shape = "Ambiguity", linetype = "Ambiguity", fill = "Ambiguity")
+```
+
+#### Disambiguating region: Syntactic adaptation: Linear mixed effects model
+```{r, cache = TRUE}
+# Getting the right data
+disambig <- subset(critical, Region == "Disambiguating")
+disambig_region_corrected <- data_summary(disambig, "corrected_log_rt", groupnames = c("Region", "Ambiguity", "Block", "Subject", "Item", "Exp.Item.TRIAL", "TRIAL"))
+
+# Setting contrasts
+disambig_region_corrected$Ambiguity <- factor(disambig_region_corrected$Ambiguity, levels = c("Amb", "Unamb"))
+contrasts(disambig_region_corrected$Ambiguity) <- "contr.sum"
+contrasts(disambig_region_corrected$Ambiguity)
+
+# Running the model
+model1 <- lmer(corrected_log_rt ~ Ambiguity * c.(Exp.Item.TRIAL) + c.(log(TRIAL)) + 
+              (1 + Ambiguity + c.(log(TRIAL)) | Subject) + 
+              (1 + Ambiguity | Item), disambig_region_corrected)
+summary(model1)
+```
+
+#### Disambiguating region: Mean RTs of four conditions
+```{r, cache = TRUE, fig.height=4, fig.width=6}
+# mean RTs in disambiguating region of four conditions (RTs not corrected for trials)
+summary_condition <- data_summary(disambig, "corrected_log_rt", groupnames = "Condition")
+summary_condition$Condition <- factor(summary_condition$Condition, levels = c("A", "C", "D", "B"))
+ggplot(summary_condition, aes(Condition, corrected_log_rt, group = Condition, colour = Condition, fill = Condition)) +
+  geom_point(size=2) + 
+  geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=corrected_log_rt-ci, ymax=corrected_log_rt+ci), width=.2, colour = "black") +
+  scale_x_discrete(labels = c('A(CA)', 'C(IA)', 'D(CU)', 'B(IU)'))
+```
+
+#### Disambiguating region: Conflict adaptation: Linear mixed effects model
+```{r, cache = TRUE}
+# Getting the right data
+dis_region_confli <- ddply(disambig, .(Subject, Item, Exp.Item.TRIAL, TRIAL, Ambiguity, Stroop), function(x) mean(x$corrected_log_rt, na.rm=T))
+
+# Setting contrasts
+dis_region_confli$Ambiguity <- factor(dis_region_confli$Ambiguity, levels = c("Amb","Unamb"))
+contrasts(dis_region_confli$Ambiguity) <- "contr.sum"
+contrasts(dis_region_confli$Ambiguity)
+dis_region_confli$Stroop <- factor(dis_region_confli$Stroop, levels = c("I","C"))
+contrasts(dis_region_confli$Stroop) <- "contr.sum"
+contrasts(dis_region_confli$Stroop)
+names(dis_region_confli)[names(dis_region_confli) == "V1"] <- "corrected_log_rt"
+
+# Running the model
+model2 <- lmer(corrected_log_rt ~ Ambiguity * Stroop +
+                 (1 + Ambiguity + Stroop | Subject) + 
+                 (1 + Ambiguity + Stroop | Item), dis_region_confli)
+
+summary(model2)
+```
+
+#### Disambiguating region: Syntactic X conflict adaptation (3-way interaction?)
+```{r, cache = TRUE}
+# Running the model
+model3 <- lmer(corrected_log_rt ~ Ambiguity * Stroop * c.(Exp.Item.TRIAL) + c.(log(TRIAL)) +
+                 (1 + Ambiguity + c.(log(TRIAL)) | Subject) + 
+                 (1 + Ambiguity | Item), dis_region_confli)
+
+summary(model3)
+```
+
+### Ambiguous region {#amb}
+
+#### Ambiguous region: Garden path effect by critical item order
+```{r, cache = TRUE, fig.height=4, fig.width=6}
+# RTs corrected for stimulus order, fit with a log curve (replicating Fine & Jaeger, 2016)
+mixed_model_sent_num <- lm(corrected_log_rt ~ TRIAL, critical)
+critical$sentnum_corrected_rt <- residuals(mixed_model_sent_num)
+
+by_critnum_sentnumcorrected_amb <- data_summary(subset(critical, Region == "Ambiguous"), "sentnum_corrected_rt", groupnames = c("Exp.Item.TRIAL", "Ambiguity"))
+
+ggplot(by_critnum_sentnumcorrected_amb, aes(Exp.Item.TRIAL, sentnum_corrected_rt, group = Ambiguity, colour = Ambiguity, fill = Ambiguity, shape = Ambiguity, linetype = Ambiguity)) + 
+	geom_point() + guides(fill = FALSE) + geom_smooth(method = lm, formula = y ~ log(x)) + 
+  labs(x = "# RCs seen", y = "Length and order corrected RT", colour = "Ambiguity", shape = "Ambiguity", linetype = "Ambiguity")
+
+# RTs not corrected for stimulus number, fit with a loess curve (Prasad & Linzen, submitted)
+by_critnum_amb <- data_summary(subset(critical, Region == "Ambiguous"), "corrected_log_rt", groupnames = c("Exp.Item.TRIAL", "Ambiguity"))
+ggplot(by_critnum_amb, aes(Exp.Item.TRIAL, corrected_log_rt, group = Ambiguity, colour = Ambiguity, fill = Ambiguity, shape = Ambiguity, linetype = Ambiguity)) + 
+	geom_point() + geom_smooth() + 
+  labs(x = "# RCs seen", y = "Length corrected log RT", colour = "Ambiguity", shape = "Ambiguity", linetype = "Ambiguity", fill = "Ambiguity")
+```
+
+#### Ambiguous region: Syntactic adaptation: Linear mixed effects model
+```{r, cache = TRUE}
+# Getting the right data
+ambig <- subset(critical, Region == "Ambiguous")
+ambig_region_corrected <- data_summary(ambig, "corrected_log_rt", groupnames = c("Region", "Ambiguity", "Block", "Subject", "Item", "Exp.Item.TRIAL", "TRIAL"))
+
+# Setting contrasts
+ambig_region_corrected$Ambiguity <- factor(ambig_region_corrected$Ambiguity, levels = c("Amb", "Unamb"))
+contrasts(ambig_region_corrected$Ambiguity) <- "contr.sum"
+contrasts(ambig_region_corrected$Ambiguity)
+
+# Running the model
+model1_amb <- lmer(corrected_log_rt ~ Ambiguity * c.(Exp.Item.TRIAL) + c.(log(TRIAL)) + 
+			        (1 + Ambiguity + c.(log(TRIAL)) | Subject) + 
+			        (1 + Ambiguity | Item), ambig_region_corrected)
+summary(model1_amb)
+```
+
+#### Ambiguous region: Mean RTs of four conditions
+```{r, cache = TRUE, fig.height=4, fig.width=6}
+# mean RTs in disambiguating region of four conditions (RTs not corrected for trials)
+summary_condition_amb <- data_summary(ambig, "corrected_log_rt", groupnames = "Condition")
+summary_condition_amb$Condition <- factor(summary_condition_amb$Condition, levels = c("A", "C", "D", "B"))
+ggplot(summary_condition_amb, aes(Condition, corrected_log_rt, group = Condition, colour = Condition, fill = Condition)) +
+  geom_point(size=2) + 
+  geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=corrected_log_rt-ci, ymax=corrected_log_rt+ci), width=.2, colour = "black") +
+  scale_x_discrete(labels = c('A(CA)', 'C(IA)', 'D(CU)', 'B(IU)'))
+```
+
+#### Ambiguous region: Conflict adaptation: Linear mixed effects model
+```{r, cache = TRUE}
+# Getting the right data
+amb_region_confli <- ddply(ambig, .(Subject, Item, Exp.Item.TRIAL, TRIAL, Ambiguity, Stroop), function(x) mean(x$corrected_log_rt, na.rm=T))
+
+# Setting contrasts
+amb_region_confli$Ambiguity <- factor(amb_region_confli$Ambiguity, levels = c("Amb","Unamb"))
+contrasts(amb_region_confli$Ambiguity) <- "contr.sum"
+contrasts(amb_region_confli$Ambiguity)
+amb_region_confli$Stroop <- factor(amb_region_confli$Stroop, levels = c("I","C"))
+contrasts(amb_region_confli$Stroop) <- "contr.sum"
+contrasts(amb_region_confli$Stroop)
+names(amb_region_confli)[names(amb_region_confli) == "V1"] <- "corrected_log_rt"
+
+# Running the model
+model2_amb <- lmer(corrected_log_rt ~ Ambiguity * Stroop + c.(log(TRIAL)) +
+                 (1 + Ambiguity | Subject) + 
+                 (1 + Ambiguity | Item), amb_region_confli)
+
+summary(model2_amb)
+```
+
+#### Ambiguous region: Syntactic X conflict adaptation (3-way interaction?)
+```{r, cache = TRUE}
+# Running the model
+model3_amb <- lmer(corrected_log_rt ~ Ambiguity * Stroop * c.(Exp.Item.TRIAL) + c.(log(TRIAL)) +
+                 (1 | Subject) + 
+                 (1 | Item), amb_region_confli)
+
+summary(model3_amb)
+
+# breakdown the interaction
+model3_amb_break <- lmer(corrected_log_rt ~ Stroop / Ambiguity + c.(Exp.Item.TRIAL) + c.(log(TRIAL)) +
+                 (1 | Subject) + 
+                 (1 | Item), amb_region_confli)
+
+summary(model3_amb_break)
+
+model3_amb_break <- lmer(corrected_log_rt ~ Ambiguity / Stroop + c.(Exp.Item.TRIAL) + c.(log(TRIAL)) +
+                 (1 | Subject) + 
+                 (1 | Item), amb_region_confli)
+
+summary(model3_amb_break)
+```
+
+### Final region {#fin}
+
+#### Final region: Garden path effect by critical item order
+```{r, cache = TRUE, fig.height=4, fig.width=6}
+# RTs corrected for stimulus order, fit with a log curve (replicating Fine & Jaeger, 2016)
+mixed_model_sent_num <- lm(corrected_log_rt ~ TRIAL, critical)
+critical$sentnum_corrected_rt <- residuals(mixed_model_sent_num)
+
+by_critnum_sentnumcorrected_fin <- data_summary(subset(critical, Region == "Final"), "sentnum_corrected_rt", groupnames = c("Exp.Item.TRIAL", "Ambiguity"))
+
+ggplot(by_critnum_sentnumcorrected_fin, aes(Exp.Item.TRIAL, sentnum_corrected_rt, group = Ambiguity, colour = Ambiguity, fill = Ambiguity, shape = Ambiguity, linetype = Ambiguity)) + 
+	geom_point() + guides(fill = FALSE) + geom_smooth(method = lm, formula = y ~ log(x)) + 
+  labs(x = "# RCs seen", y = "Length and order corrected RT", colour = "Ambiguity", shape = "Ambiguity", linetype = "Ambiguity")
+
+# RTs not corrected for stimulus number, fit with a loess curve (Prasad & Linzen, submitted)
+by_critnum_fin <- data_summary(subset(critical, Region == "Final"), "corrected_log_rt", groupnames = c("Exp.Item.TRIAL", "Ambiguity"))
+ggplot(by_critnum_fin, aes(Exp.Item.TRIAL, corrected_log_rt, group = Ambiguity, colour = Ambiguity, fill = Ambiguity, shape = Ambiguity, linetype = Ambiguity)) + 
+	geom_point() + geom_smooth() + 
+  labs(x = "# RCs seen", y = "Length corrected log RT", colour = "Ambiguity", shape = "Ambiguity", linetype = "Ambiguity", fill = "Ambiguity")
+```
+
+#### Final region: Syntactic adaptation: Linear mixed effects model
+```{r, cache = TRUE}
+# Getting the right data
+fin <- subset(critical, Region == "Final")
+fin_region_corrected <- data_summary(fin, "corrected_log_rt", groupnames = c("Region", "Ambiguity", "Block", "Subject", "Item", "Exp.Item.TRIAL", "TRIAL"))
+
+# Setting contrasts
+fin_region_corrected$Ambiguity <- factor(fin_region_corrected$Ambiguity, levels = c("Amb", "Unamb"))
+contrasts(fin_region_corrected$Ambiguity) <- "contr.sum"
+contrasts(fin_region_corrected$Ambiguity)
+
+# Running the model
+model1_fin <- lmer(corrected_log_rt ~ Ambiguity * c.(Exp.Item.TRIAL) + c.(log(TRIAL)) + 
+			        (1 + Ambiguity | Subject) + 
+			        (1 + Ambiguity | Item), fin_region_corrected)
+summary(model1_fin)
+```
+
+#### Final region: Mean RTs of four conditions
+```{r, cache = TRUE, fig.height=4, fig.width=6}
+# mean RTs in disambiguating region of four conditions (RTs not corrected for trials)
+summary_condition_fin <- data_summary(fin, "corrected_log_rt", groupnames = "Condition")
+summary_condition_fin$Condition <- factor(summary_condition_fin$Condition, levels = c("A", "C", "D", "B"))
+ggplot(summary_condition_fin, aes(Condition, corrected_log_rt, group = Condition, colour = Condition, fill = Condition)) +
+  geom_point(size=2) + 
+  geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=corrected_log_rt-ci, ymax=corrected_log_rt+ci), width=.2, colour = "black") +
+  scale_x_discrete(labels = c('A(CA)', 'C(IA)', 'D(CU)', 'B(IU)'))
+```
+
+#### Final region: Conflict adaptation: Linear mixed effects model
+```{r, cache = TRUE}
+# Getting the right data
+fin_region_confli <- ddply(fin, .(Subject, Item, Exp.Item.TRIAL, TRIAL, Ambiguity, Stroop), function(x) mean(x$corrected_log_rt, na.rm=T))
+
+# Setting contrasts
+fin_region_confli$Ambiguity <- factor(fin_region_confli$Ambiguity, levels = c("Amb","Unamb"))
+contrasts(fin_region_confli$Ambiguity) <- "contr.sum"
+contrasts(fin_region_confli$Ambiguity)
+fin_region_confli$Stroop <- factor(fin_region_confli$Stroop, levels = c("I","C"))
+contrasts(fin_region_confli$Stroop) <- "contr.sum"
+contrasts(fin_region_confli$Stroop)
+names(fin_region_confli)[names(fin_region_confli) == "V1"] <- "corrected_log_rt"
+
+# Running the model
+model2_fin <- lmer(corrected_log_rt ~ Ambiguity * Stroop + c.(log(TRIAL)) +
+                 (1 + Ambiguity | Subject) + 
+                 (1 + Ambiguity | Item), fin_region_confli)
+
+summary(model2_fin)
+```
+
+#### Final region: Syntactic X conflict adaptation (3-way interaction?)
+```{r, cache = TRUE}
+# Running the model
+model3_fin <- lmer(corrected_log_rt ~ Ambiguity * Stroop * c.(Exp.Item.TRIAL) + c.(log(TRIAL)) +
+                 (1 | Subject) + 
+                 (1 | Item), fin_region_confli)
+
+summary(model3_fin)
+
+# breakdown the interaction
+model3_fin_break <- lmer(corrected_log_rt ~ Stroop / Ambiguity + c.(Exp.Item.TRIAL) + c.(log(TRIAL)) +
+                 (1 | Subject) + 
+                 (1 | Item), fin_region_confli)
+
+summary(model3_fin_break)
+
+model3_fin_break <- lmer(corrected_log_rt ~ Ambiguity / Stroop + c.(Exp.Item.TRIAL) + c.(log(TRIAL)) +
+                 (1 | Subject) + 
+                 (1 | Item), fin_region_confli)
+
+summary(model3_fin_break)
+```
