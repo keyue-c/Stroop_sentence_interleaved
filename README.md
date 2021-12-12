@@ -1,4 +1,4 @@
-# Stroop_Syntax
+# Stroop_sentence_interleaved
 
 Created in Feb 2020. Wrote on PCIbex (https://doc.pcibex.net/)
 
